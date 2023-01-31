@@ -5,16 +5,44 @@ class ProductManager {
     this.path = path;
   }
 
-  async addProduct(product) {
-    try {
-      let products = await this.getProducts();
-      product.id = products.length + 1;
-      products.push(product);
-      await fs.writeFile(this.path, JSON.stringify(products));
-      return product;
-    } catch (error) {
-      console.error(error);
-    }
+  async addProduct(title, description, price, thumbnail, code, stock) {
+    return new Promise((resolve, reject) => {
+      if (!title || !description || !price || !thumbnail || !code || !stock) {
+        reject("All fields are required");
+      }
+  
+      fs.readFile(this.filePath, "utf8", (err, data) => {
+        if (err) {
+          reject(err);
+        }
+    
+        let products = JSON.parse(data);
+  
+        for (let i = 0; i < products.length; i++) {
+          if (products[i].code === code) {
+            reject("Code must be unique");
+          }
+        }
+    
+        products.push({
+          id: ++this.idCounter,
+          title,
+          description,
+          price,
+          thumbnail,
+          code,
+          stock,
+        });
+    
+        fs.writeFile(this.filePath, JSON.stringify(products), (err) => {
+          if (err) {
+            reject(err);
+          }
+    
+          resolve();
+        });
+      });
+    });
   }
 
   async getProducts() {
