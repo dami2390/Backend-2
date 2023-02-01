@@ -63,7 +63,7 @@ consultasTXT('./ejemplo.txt') */
 const productos = [{nombre: "Hola"}]
 
 const consultasTXT = async (ruta) => {
-    await fs.writeFile(ruta, "")
+    await fs.writeFile(ruta, "Hola")
     let contenido = await  fs.readFile('./ejemplo.txt', 'utf-8')//leo el contenido
     console.log(contenido)
     await fs.appendFile('./ejemplo.txt', JSON.stringify(productos))

@@ -1,4 +1,4 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 
 class ProductManager {
   constructor(path) {
@@ -6,48 +6,36 @@ class ProductManager {
   }
 
   async addProduct(title, description, price, thumbnail, code, stock) {
-    return new Promise((resolve, reject) => {
-      if (!title || !description || !price || !thumbnail || !code || !stock) {
-        reject("All fields are required");
+    if (!title || !description || !price || !thumbnail || !code || !stock) {
+      console.log("All fields are required");
+      return;
+    }
+  
+    const products = JSON.parse(await fs.promises.readFile(this.path, "utf-8"));
+    for (let i = 0; i < products.length; i++) {
+      if (products[i].code === code) {
+        console.log("Code must be unique");
+        return;
       }
+    }
   
-      fs.readFile(this.filePath, "utf8", (err, data) => {
-        if (err) {
-          reject(err);
-        }
-    
-        let products = JSON.parse(data);
-  
-        for (let i = 0; i < products.length; i++) {
-          if (products[i].code === code) {
-            reject("Code must be unique");
-          }
-        }
-    
-        products.push({
-          id: ++this.idCounter,
-          title,
-          description,
-          price,
-          thumbnail,
-          code,
-          stock,
-        });
-    
-        fs.writeFile(this.filePath, JSON.stringify(products), (err) => {
-          if (err) {
-            reject(err);
-          }
-    
-          resolve();
-        });
-      });
-    });
+    this.idCounter++;
+    const newProduct = {
+      id: this.idCounter,
+      title,
+      description,
+      price,
+      thumbnail,
+      code,
+      stock,
+    };
+    products.push(newProduct);
+    await fs.promises.writeFile(this.path, JSON.stringify(products));
   }
 
   async getProducts() {
     try {
-      let data = await fs.readFile(this.path, 'utf8');
+      let data = await fs.readFile(this.path, 'utf-8');
       return JSON.parse(data);
     } catch (error) {
       console.error(error);
@@ -89,3 +77,8 @@ class ProductManager {
 }
 
 module.exports = ProductManager;
+
+const test = new ProductManager("./ejemplo.txt");
+test.getProducts()
+/* test.addProduct("producto prueba", "este es un producto prueba", 200, "Sin imagen", "abc123", 25);
+test.getProducts() */
