@@ -14,56 +14,65 @@ server.listen(PORT, (err, result) => {
  */
 
 import express from 'express'
+// import routerProduct from './routes/products.routes'
+import productManager from './controllers/ProductManager.js'
+import { __dirname } from './path.js'
+import multer from 'multer'
+
+//const upload = multer({dest:"src/public/img"})
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'src/public/img')
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${file.originalname}`)
+    }
+})
+
+const upload = multer({storage:storage})
 
 const app = express()
 const PORT = 4000
 
-const users = [
-        { nombre: 'Agustin',
-        apellido: 'Perez',
-        id: 1,
-        cargo: "profesor"
-        },
-        { nombre: 'Bruno',
-        apellido: 'Lopez',
-        id: 2,
-        cargo: "tutor"
-        },
-        { nombre: 'Damian',
-        apellido: 'Ferrara',
-        id: 3,
-        cargo: "tutor"
-        }
-]
+
 
 app.use(express.urlencoded({extended: true})) // Permite realizar consultas en la URL (req.query)
 app.use(express.json()); // Permite que le envie JSON
 
-app.get('/', (req, res) => {
+/* app.get('/', (req, res) => {
     res.send("Este es mi primer servidor en Express")
-})
+}) */
 
-app.get('/user', (req, res) => {
-    let {cargo, nombre} = req.query
-    /* console.log(cargo, nombre) */
-    const usuarios = users.filter(user => user.cargo === cargo) // http://localhost:4000/user?cargo=tutor&nombre=Damian
-    res.send(JSON.stringify(usuarios))
+app.get('/', async (req,res) => {
+    let products = await productManager.getProducts()
+    let limit = parseInt(req.query.limit)
+    if (limit){
+      let prodsLtd = products.slice(0, limit)
+      res.send(prodsLtd)
+    }else{
+      res.send(products)
+  }
 })
 
 // PARAMS
 
-app.get('/user/:idUser', (req, res) => {
-    const idUser = req.params.idUser
-    const user = users.find(user => user.id === parseInt(idUser))
-    if(user){
-        res.send(`Nombre de usuario ${user.apellido}` )
-    }else {
-        res.send(`No existe el user` )
-    }
-    
+app.get('/products/:pid', async (req,res) => {
+    const pId = req.params.pid
+    let products = await productManager.getProducts()
+    const product = products.find(product => product.id === parseInt(pId))
+      if(product) {
+          res.send(product)
+      } else {
+          res.send(`El producto no existe`)
+      }
+  })
+
+  app.post('/', async (req, res) => { 
+    let productos = await productManager.addProduct(req.body)
+    res.send(productos)
 })
 
-app.post('/user', (req, res) => {
+/* app.post('/user', (req, res) => {
     let {nombre, apellido, cargo} = req.body
     const indice = users.length //le mando uno más, para poder sumarlo
     users.push({nombre: nombre, apellido: apellido, cargo: cargo, id: indice})
@@ -92,10 +101,18 @@ app.delete('/user/:idUser', (req, res) => {
     }
     
 })
-
+ */
 app.listen(PORT, (err, result) => {
     console.log(`Server on port ${PORT}`)
 })
 
-// QUERY
+// ROUTES
 
+/* app.use('/api/products', routerProduct)
+
+//Multer
+app.post("/upload",upload.single("product"),(req, res) => {
+    console.log(req.body)
+    console.log(req.file)
+    res.send("Imagen cargada")
+}) */

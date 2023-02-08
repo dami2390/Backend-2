@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
 class ProductManager {
-  constructor(title, description, price, thumbnail, code, stock) {
+  constructor(path) {
     this.id = "";
     this.products = [];
     this.path = "./products.txt";
