@@ -37,6 +37,22 @@ const upload = multer({storage:storage})
 const app = express()
 const PORT = 4000
 
+const server = app.listen(PORT, (err, result) => {
+    console.log(`Server on port ${PORT}`)
+})
+
+// Server IO
+
+const io = new Server(server)
+
+io.on("connection", (socket) => { // io.on es cuando se establece la conexion
+    console.log("Cliente conectado")
+
+    socket.on("mensaje", info => {
+        console.log(info)
+    }) // cuando recibo información de mi cliente
+})
+
 //middle
 
 app.use(express.urlencoded({extended: true})) // Permite realizar consultas en la URL (req.query)
@@ -128,9 +144,7 @@ app.post('/upload',upload.single('product'), (req,res) => {
 
 ////////////////////////////////////////////////////////////////
 
-app.listen(PORT, (err, result) => {
-    console.log(`Server on port ${PORT}`)
-})
+
 
 
 

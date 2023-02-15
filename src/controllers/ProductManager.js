@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-class ProductManager {
+export class ProductManager {
   constructor(path) {
     
     /* this.products = []; */
@@ -31,14 +31,6 @@ class ProductManager {
     return this.products;
   };
 
-  /*  async getProducts() {
-    try {
-      let data = await fs.promises.readFile(this.path, 'utf-8');
-      return JSON.parse(data);
-    } catch (error) {
-      console.error(error);
-    }
-  } */
 
   async getProductById(id) {
     try {
@@ -76,10 +68,10 @@ class ProductManager {
     this.products.splice(delProdIndex,1)
 
     let update = await fs.promises.writeFile(this.path, JSON.stringify(this.products))
-
+    return "Producto eliminado"
     }
 }
 
-const productManager = new ProductManager();
+/* const productManager = new ProductManager();
 
-export default productManager
+export default productManager */
