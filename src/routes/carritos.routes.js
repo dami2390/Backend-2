@@ -30,7 +30,7 @@ routerCart.post('/:cid/product/:pid', async (req, res) => {
 })
 
 routerCart.delete('/:id', async (req, res) => {
-    let mensaje = await cartManager.deleteProduct(req.params.id) 
+    let mensaje = await cartManager.deleteCart(req.params.id) 
     res.send(mensaje)
 })
 
