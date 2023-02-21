@@ -14,7 +14,7 @@ routerCart.get('/:cid', async (req, res) => {
 
 routerCart.post('/', async (req, res) => { 
     const carrito = await cartManager.addCart()
-    res.send(carrito)
+    res.json(carrito)
 })
 
 routerCart.post('/:cid/product/:pid', async (req, res) => { 

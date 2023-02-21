@@ -1,4 +1,4 @@
-import {promises as fs} from 'fs'
+import {promises as fs} from 'fs';
 
 class Cart {
     constructor(id, products) {
@@ -17,10 +17,13 @@ export class CartManager {
 
     addCart = async () => {
         try {
-            const read = await fs.readFile(this.path, 'utf-8')
-            let carts = JSON.parse(read)
+            const carts = JSON.parse(await fs.readFile(this.path, 'utf-8'))
             let newId
-            carts.length > 0 ? newId = carts[carts.length - 1].id + 1 : newId = 1;
+            if (carts.length > 0) {
+                newId = carts[carts.length - 1].id + 1;
+              } else {
+                newId = 1;
+              }
             const nuevoCarrito = new Cart (newId, []);
             carts.push(nuevoCarrito);
             await fs.writeFile(this.path, JSON.stringify(carts))

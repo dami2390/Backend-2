@@ -7,21 +7,31 @@ export class ProductManager {
     this.path = "./src/models/products.txt";
   }
 
-  static addId() {
+/*   static addId() {
     if (this.id) {
       this.id++;
     } else {
       this.id = 1;
     }
     return this.id;
-  }
+  } */
 
   async addProduct(producto) {
     const prods = JSON.parse(await fs.promises.readFile(this.path, 'utf-8'))
-    producto.id = ProductManager.addId()
-    prods.push(producto)
+    const prodCode = prods.map((prod) => prod.code);
+    const prodExist = prodCode.includes(producto.code); 
+    if (prodExist) {
+        return console.log (`Ya existe el código ${producto.code}. Ingresá otro.`)
+    } else if (Object.values(producto).includes("") || Object.values(producto).includes(null)) {
+        return console.log("Todos los campos deben son obligatorios.");
+    } else {
+    let prevIds = prods.map(prod => parseInt(prod.id))
+    this.id = (Math.max(...prevIds) + 1)
+    const nuevoProducto = {id: this.id, ...producto};
+    prods.push(nuevoProducto)
     await fs.promises.writeFile(this.path, JSON.stringify(prods))
     return "Producto creado"
+    }
 }
 
   getProducts = async () => {
@@ -32,18 +42,21 @@ export class ProductManager {
   };
 
 
-  async getProductById(id) {
-    try {
-      let products = await this.getProducts();
-      return products.find((product) => product.id === id);
-    } catch (error) {
-      console.error(error);
-      return "Producto no encontrado"
+  getProductById = async(id) => {
+ 
+    const prods = JSON.parse(await fs.promises.readFile(this.path, 'utf-8'))
+    const findProduct = prods.find((prod) => prod.id === parseInt(id));
+    if (findProduct) {
+        console.log(`Se ha encontrado el siguiente producto: ${findProduct.title}`)
+        return findProduct;
+    } else {
+        return console.log("No se ha encontrado ningún producto");
     }
-  }
+} 
+  
 
   async updateProduct(id, {title, description, price, thumbnail, code, stock}) {
-    const prods = JSON.parse(await fs.readFile(this.path, 'utf-8'))
+    const prods = JSON.parse(await fs.promises.readFile(this.path, 'utf-8'))
     if(prods.some(prod => prod.id === parseInt(id))) {
         let index= prods.findIndex(prod => prod.id === parseInt(id))
         prods[index].title = title
