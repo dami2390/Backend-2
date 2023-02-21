@@ -6,6 +6,10 @@ import multer from 'multer'
 import { engine } from 'express-handlebars'
 import * as path from 'path'
 import { Server } from 'socket.io';
+import routerSocket from "./routes/socket.routes.js";
+import { ProductManager } from "./controllers/ProductManager.js";
+
+const productManager = new ProductManager('src/models/products.txt');
 
 //const upload = multer({dest:"src/public/img"}) Forma basica de multer
 const storage = multer.diskStorage({
@@ -21,6 +25,11 @@ const upload = multer({storage:storage})
 
 const app = express()
 const PORT = 4000
+
+const server = app.listen(PORT, (err, result) => {
+    console.log(`Server on port ${PORT}`)
+})
+
 
 //middle
 
@@ -44,12 +53,11 @@ app.post('/upload',upload.single('product'), (req,res) => {
     console.log(req.file)
     res.send("Imagen cargada")
 })
+app.use('/', routerSocket)
+app.use('/realtimeproducts', routerSocket)
 
 ////////////////////////////////////////////////////////////////
 
-app.listen(PORT, (err, result) => {
-    console.log(`Server on port ${PORT}`)
-})
 
 
 
@@ -68,3 +76,24 @@ app.listen(PORT, (err, result) => {
     console.log(req.file)
     res.send("Imagen cargada")
 }) */
+
+// Server IO
+
+const io = new Server(server)
+
+io.on("connection", async (socket) => { //io.on es cuando se establece la conexion
+    console.log("Cliente conectado")
+
+    socket.on("addProduct", async info => {//Cuando recibo informacion de mi cliente
+        socket.emit("msgAddProduct", await productManager.addProduct(info, []))
+        socket.emit("getProducts", await productManager.getProducts())
+    })
+    
+
+    socket.on("deleteProduct", async id => {
+        socket.emit("msgDeleteProduct", await productManager.deleteProduct(parseInt(id)))
+        socket.emit("getProducts", await productManager.getProducts())
+    })
+
+    socket.emit("getProducts", await productManager.getProducts());
+})
