@@ -31,51 +31,8 @@ const server = app.listen(PORT, (err, result) => {
 })
 
 
-//middle
-
-app.use(express.urlencoded({extended: true})) // Permite realizar consultas en la URL (req.query)
-app.use(express.json()); // Permite que le envie JSON
-app.engine('handlebars', engine());
-app.set('view engine', 'handlebars');
-app.set('views', path.resolve(__dirname, './views'));
-
-
-// ROUTES
-
-app.use('/api/products', routerProduct)
-
-
-app.use('/static', express.static(__dirname + '/public'))
-app.use('/api/products', routerProduct)
-app.use('/api/carts', routerCart)
-app.post('/upload',upload.single('product'), (req,res) => {
-    console.log(req.body)
-    console.log(req.file)
-    res.send("Imagen cargada")
-})
-app.use('/', routerSocket)
-app.use('/realtimeproducts', routerSocket)
-
 ////////////////////////////////////////////////////////////////
 
-
-
-
-//HBS
-/* app.get('/', (req, res) => {
-    res.render("home", {//renderizar la vista siguiente
-        mensaje:"Pepe"
-    
-    })
-})
- */
-
-//Multer
-/*app.post("/upload",upload.single("product"),(req, res) => {
-    console.log(req.body)
-    console.log(req.file)
-    res.send("Imagen cargada")
-}) */
 
 // Server IO
 
@@ -91,9 +48,36 @@ io.on("connection", async (socket) => { //io.on es cuando se establece la conexi
     
 
     socket.on("deleteProduct", async id => {
-        socket.emit("msgDeleteProduct", await productManager.deleteProduct(parseInt(id)))
+        socket.emit("msgDeleteProduct", await productManager.deleteProductById(parseInt(id)))
         socket.emit("getProducts", await productManager.getProducts())
     })
 
     socket.emit("getProducts", await productManager.getProducts());
 })
+
+
+
+//middle
+
+app.use(express.urlencoded({extended: true})) // Permite realizar consultas en la URL (req.query)
+app.use(express.json()); // Permite que le envie JSON
+app.engine('handlebars', engine());
+app.set('view engine', 'handlebars');
+app.set('views', path.resolve(__dirname, './views'));
+
+
+// ROUTES
+
+app.use('/api/products', routerProduct)
+
+
+app.use('/', express.static(__dirname + '/public')) // static
+app.use('/api/products', routerProduct)
+app.use('/api/carts', routerCart)
+/* app.post('/upload',upload.single('product'), (req,res) => {
+    console.log(req.body)
+    console.log(req.file)
+    res.send("Imagen cargada")
+}) */
+app.use('/', routerSocket)
+app.use('/realtimeproducts', routerSocket)

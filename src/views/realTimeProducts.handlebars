@@ -1,3 +1,4 @@
+<a href="#" class="header__logo"><img src="img/logomascotas.png" alt="Logo"></a>
 <h1 class="text-center">Formulario de subida de productos</h1> 
 <form id="addProductForm" class="ProductForm">
     <p class="text-center">Ingresar los datos del producto:</p>
@@ -36,7 +37,7 @@
 <h2 class="text-center">Lista de productos en tiempo real:</h2>
 <div id="realTimeProducts" class="realTimeProducts">
     {{#each products}}
-        <div id="productsFromServer"></div>
+        <div id="productsFromServer" class="realTimeProducts"></div>
     {{/each}}
 </div>
 
